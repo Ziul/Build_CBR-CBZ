@@ -17,7 +17,7 @@ from sys import argv
 
 import optparse
 _parser = optparse.OptionParser(
-		usage = "python %prog [[options] [-o output file] [-i local of files]]",
+		usage = "python %prog [[options] [-o output file] [local of files]]",
 		description = "Build a CBR/CBZ file with selected files",
 		version = __version__
 		)
@@ -27,16 +27,12 @@ _parser.add_option("-q", "--quiet",
 	help = "suppress non error messages",
 	default = True
 )
-_parser.add_option("-i", "--input",
-	dest = "input",
-	action = "store_false",
-	help = "suppress non error messages",
-	default = '.'
-)
+
 _parser.add_option("-o", "--output",
-	dest = "verbose",
-	action = "store_false",
-	help = "suppress non error messages",
+	dest = "output",
+	action = "store",
+	help = "force a name to output file. \
+Default is the name of this directory [%s]"%(path.realpath('.').split('/')[-1]),
 	default = path.realpath('.').split('/')[-1]
 )
 
@@ -120,8 +116,8 @@ def main():
 		files = sorted(files )	#order them
 		#print files
 		files = ' '.join(files) #formating string with files
-		make_cbz(path.realpath('.').split('/')[-1],files)
-		make_cbr(path.realpath('.').split('/')[-1],files)
+		make_cbz(_options.output,files)
+		make_cbr(_options.output,files)
 	else:
 		print "Put some *.jpg or *.png on " + path.realpath('.')
 
