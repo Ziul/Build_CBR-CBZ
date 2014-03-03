@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #  -*- coding: utf-8 -*-
 
-""" This routine will make a CBR file with the same name 
+""" This routine will make a CBR/CBZ file with the same name 
 of the directory where is called with all the *.jpg and *.png files on it. """
 
 __author__ = "Luiz Fernando Gomes de Oliveira"
@@ -14,6 +14,7 @@ from subprocess import call, PIPE, STDOUT
 from distutils import spawn
 from glob import glob
 from sys import argv
+from warnings import warn
 
 import optparse
 _parser = optparse.OptionParser(
@@ -36,16 +37,25 @@ _parser.add_option("-o", "--output",
 Default is the name of this directory [%s]"%(path.realpath('.').split('/')[-1]),
 	default = path.realpath('.').split('/')[-1]
 )
+#Choose type of output
+_parser.add_option("-t", "--type",
+	dest = "extension",
+	action = "store",
+	help = "Choose between CBR or CBZ. By default will create both outputs.",
+	default = 'both'
+)
 #get parser
 (_options, args) = _parser.parse_args()
+_options.extension = _options.extension.lower()
 
 def make_cbr(output, files = '*.jpg *.JPG *.png *.PNG'):
 	''' Make a <output>.cbr file in this directory with all *.jpg and *.png files'''
+	rename_file_on_dir()
 	call (['rm %s.cbr -f'%(output)],shell=True)
 	if files[-1] == '*':
 		files = files[:-1]
 	if _options.verbose:
-		print 'rar a -v -m0 -mt5 %s.cbr %s'%(output,files)
+		print '\n$ rar a -v -m0 -mt5 %s.cbr %s'%(output,files)
 		call( ['rar a -v -m0 -mt5 %s.cbr %s'%(output,files)], shell=True,stdout=None)
 	else:
 		call( ['rar a -v -m0 -mt5 %s.cbr %s'%(output,files)], shell=True,stdout=PIPE)
@@ -53,11 +63,12 @@ def make_cbr(output, files = '*.jpg *.JPG *.png *.PNG'):
 
 def make_cbz(output, files = '*.jpg *.JPG *.png *.PNG'):
 	''' Make a <output>.cbz file in this directory with all *.jpg and *.png files'''
+	rename_file_on_dir()
 	if files[-1] == '/':
 		files = files[:-1]
 	call (['rm %s.cbz -f'%(output)],shell=True)
 	if _options.verbose:
-		print '7z a %s.zip %s'%(output,files)
+		print '\n$ 7z a %s.zip %s'%(output,files)
 		call( ['7z a %s.zip %s'%(output,files)], shell=True,stdout=None)
 		call( ['mv %s.zip %s.cbz -vf'%(output,output)], shell=True)
 	else:
@@ -72,9 +83,10 @@ def rename_file_on_dir():
 	ex:
 		['1.jpg', '23.jpg'] ----> ['0001.jpg','0023.jpg']
 	With this the CBR/CBZ will sorte the files correctly'''
+	if _options.verbose:
+		print "Checking needs for rename files:"
 	from shutil import move,copy
 	for root, dirs, files in walk(argv[1]):
-
 		for f in files:
 			try:
 				if root[-1] == '/':
@@ -89,8 +101,9 @@ def rename_file_on_dir():
 
 
 def main():
-	''' Will run de default rotine and build a <path>.cbr on the directory with 
-		all the *.jpg or *.png files in this directory'''
+	''' Will run de default rotine and build a <path>.cbr and/ou a <path>.cbr on the directory.
+	By default will search for *.jpg or *.png on this directory.
+	The user can parse a list of files/directories.'''
 	#check if rar is instaled
 	if spawn.find_executable("rar") == None:
 		print "The program 'rar' is currently not installed.  You can install it by typing:\n\tsudo apt-get install rar"
@@ -107,22 +120,25 @@ def main():
 	else:
 		#A directory of files
 		if len(args)>1:
-			import warnings
-			#print "You are not passing a directory, but a list of files"
-			warnings.warn("You are not passing a directory, but a list of files.", Warning)
-			# Warning: Sometimes couse problens
+			warn("You are not passing a directory, but a list of files.", Warning)
+			# Warning: Sometimes raise some syntax problems
 			files = args
 		else:
 			files = args
-			rename_file_on_dir()
 		#print files
 	if files:
-		#files = sorted(files, key=lambda x: int(x.split('.')[0])  )	#order them
 		files = sorted(files )	#order them
 		#print files
 		files = ' '.join(files) #formating string with files
-		make_cbz(_options.output,files)
-		make_cbr(_options.output,files)
+		if _options.extension == 'cbz':
+			make_cbz(_options.output,files)
+		elif _options.extension == 'cbr':
+			make_cbr(_options.output,files)
+		elif _options.extension != 'both':
+			warn("You have passed a not supported extension.", Warning)			
+		else:
+			make_cbz(_options.output,files)
+			make_cbr(_options.output,files)
 	else:
 		print "Put some *.jpg or *.png on " + path.realpath('.')
 
