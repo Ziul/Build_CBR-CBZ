@@ -21,13 +21,14 @@ _parser = optparse.OptionParser(
 		description = "Build a CBR/CBZ file with selected files",
 		version = __version__
 		)
+#quiet options
 _parser.add_option("-q", "--quiet",
 	dest = "verbose",
 	action = "store_false",
 	help = "suppress non error messages",
 	default = True
 )
-
+#output options
 _parser.add_option("-o", "--output",
 	dest = "output",
 	action = "store",
@@ -35,10 +36,8 @@ _parser.add_option("-o", "--output",
 Default is the name of this directory [%s]"%(path.realpath('.').split('/')[-1]),
 	default = path.realpath('.').split('/')[-1]
 )
-
-
+#get parser
 (_options, args) = _parser.parse_args()
-#print args
 
 def make_cbr(output, files = '*.jpg *.JPG *.png *.PNG'):
 	''' Make a <output>.cbr file in this directory with all *.jpg and *.png files'''
@@ -50,10 +49,10 @@ def make_cbr(output, files = '*.jpg *.JPG *.png *.PNG'):
 		call( ['rar a -v -m0 -mt5 %s.cbr %s'%(output,files)], shell=True,stdout=None)
 	else:
 		call( ['rar a -v -m0 -mt5 %s.cbr %s'%(output,files)], shell=True,stdout=PIPE)
-	
+
 
 def make_cbz(output, files = '*.jpg *.JPG *.png *.PNG'):
-	''' Make a <output>.cbr file in this directory with all *.jpg and *.png files'''
+	''' Make a <output>.cbz file in this directory with all *.jpg and *.png files'''
 	if files[-1] == '/':
 		files = files[:-1]
 	call (['rm %s.cbz -f'%(output)],shell=True)
@@ -64,8 +63,7 @@ def make_cbz(output, files = '*.jpg *.JPG *.png *.PNG'):
 	else:
 		call( ['7z a %s.zip %s'%(output,files)], shell=True,stdout=PIPE)
 		call( ['mv %s.zip %s.cbz -f'%(output,output)], shell=True)
-	
-	
+
 
 def rename_file_on_dir():
 	'''CBR/CBZ files have some problens on sorting the files when the name is just
@@ -93,9 +91,13 @@ def rename_file_on_dir():
 def main():
 	''' Will run de default rotine and build a <path>.cbr on the directory with 
 		all the *.jpg or *.png files in this directory'''
-	#if not  is_tool('rar'):
+	#check if rar is instaled
 	if spawn.find_executable("rar") == None:
 		print "The program 'rar' is currently not installed.  You can install it by typing:\n\tsudo apt-get install rar"
+		return False
+	#check if 7z is instaled
+	if spawn.find_executable("7z") == None:
+		print "The program '7z' is currently not installed.  You can install it by typing:\n\tsudo apt-get install 7z"
 		return False
 
 	if len(args)==[]:
@@ -105,7 +107,10 @@ def main():
 	else:
 		#A directory of files
 		if len(args)>1:
-			print "You are not passing a directory, but a list of files"
+			import warnings
+			#print "You are not passing a directory, but a list of files"
+			warnings.warn("You are not passing a directory, but a list of files.", Warning)
+			# Warning: Sometimes couse problens
 			files = args
 		else:
 			files = args
