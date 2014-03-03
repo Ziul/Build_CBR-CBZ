@@ -1,11 +1,12 @@
 #!/usr/bin/python
 #  -*- coding: utf-8 -*-
 
-""" This routine will make a CBR/CBZ file with the same name 
-of the directory where is called with all the *.jpg and *.png files on it. """
+''' Will run de default rotine and build a <path>.cbr and/ou a <path>.cbr on the directory.
+	By default will search for *.jpg or *.png on this directory.
+	The user can parse a list of files/directories.'''
 
 __author__ = "Luiz Fernando Gomes de Oliveira"
-__version__ = '0.7'
+__version__ = '0.8'
 __license__ = 'MIT'
 
 from multiprocessing import Process
@@ -100,7 +101,7 @@ def rename_file_on_dir():
 				raise e
 
 
-def main():
+def _main():
 	''' Will run de default rotine and build a <path>.cbr and/ou a <path>.cbr on the directory.
 	By default will search for *.jpg or *.png on this directory.
 	The user can parse a list of files/directories.'''
@@ -144,5 +145,5 @@ def main():
 
 
 if __name__ == '__main__':
-	main()
+	_main()
 
