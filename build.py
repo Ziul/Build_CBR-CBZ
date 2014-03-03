@@ -55,6 +55,8 @@ def make_cbr(output, files = '*.jpg *.JPG *.png *.PNG'):
 	call (['rm %s.cbr -f'%(output)],shell=True)
 	if files[-1] == '*':
 		files = files[:-1]
+	if files[-1] == '/':
+		files += '*'
 	if _options.verbose:
 		print '\n$ rar a -v -m0 -mt5 %s.cbr %s'%(output,files)
 		call( ['rar a -v -m0 -mt5 %s.cbr %s'%(output,files)], shell=True,stdout=None)
